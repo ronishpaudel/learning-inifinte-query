@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Item, fetchItems } from "./api/item";
+// Adjust the import path accordingly
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const {
+    data,
+    error,
+    status,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["items"],
+    queryFn: ({ pageParam = 0 }) => fetchItems({ pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+  });
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="flex flex-col gap-2">
+      {status === "pending" ? (
+        <div>Loading...</div>
+      ) : status === "error" ? (
+        <div>{(error as Error).message}</div>
+      ) : (
+        <>
+          {data?.pages.map((page, index) => (
+            <div key={index} className="flex flex-col gap-2">
+              {page.data.map((item: Item) => (
+                <div key={item.id} className="rounded-md bg-grayscale-700 p-4">
+                  {item.name}
+                </div>
+              ))}
+            </div>
+          ))}
+          {hasNextPage && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="rounded-md bg-blue-500 p-2 text-white mt-4"
+            >
+              {isFetchingNextPage ? "Loading..." : "Show More"}
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
-
-export default App
