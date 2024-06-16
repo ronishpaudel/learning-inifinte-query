@@ -1,6 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Item, fetchItems } from "./api/item";
-// Adjust the import path accordingly
 
 export default function App() {
   const {
