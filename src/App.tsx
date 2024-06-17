@@ -15,7 +15,6 @@ export default function App() {
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
   });
-
   return (
     <div className="flex flex-col gap-2">
       {status === "pending" ? (
